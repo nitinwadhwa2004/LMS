@@ -1,0 +1,23 @@
+Mongoose
+----------
+
+Everything in Mongoose starts with a Schema. Each schema maps to a MongoDB collection and defines the shape of the documents 
+within that collection. A model is a class with which we construct documents. Instances of Models are documents. 
+
+Terminologies:
+Collections - ‘Collections’ in Mongo are equivalent to tables in relational databases. They can hold multiple JSON documents.
+Documents - 'Documents’ are equivalent to records or rows of data in SQL. While a SQL row can reference data in other tables, Mongo documents usually combine that in a document.
+Fields - ‘Fields’ or attributes are similar to columns in a SQL table.
+Schema - While Mongo is schema-less, SQL defines a schema via the table definition. A Mongoose ‘schema’ is a document data structure (or shape of the document) that is enforced via the application layer.
+Models - ‘Models’ are higher-order constructors that take a schema and create an instance of a document equivalent to records in a relational database.
+
+A Mongoose model is a wrapper on the Mongoose schema. A Mongoose schema defines the structure of the document, default values, validators, etc., whereas a Mongoose model provides an interface to the database for creating, querying, updating, deleting records, etc.
+A schema defines document properties through an object where the key name corresponds to the property name in the collection.
+Schema - A formal description of the structure of a database: the names of the tables, the names of the columns of each table, and the data type and other attributes of each column.
+
+
+Express
+----------
+
+without middleware: new request -> run route handler
+with middleware: new request -> do somethign -> run route handler

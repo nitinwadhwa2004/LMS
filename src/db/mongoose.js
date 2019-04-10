@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-//TO run mongodb server - c:/mongodb/bin/mongod.exe --dbpath=c:/mongodb-data
+//To run mongodb server - c:/mongodb/bin/mongod.exe --dbpath=c:/mongodb-data
 //Database Configuration
 const connectionURL = "mongodb://127.0.0.1:27017";
 const databaseName = 'LMS';

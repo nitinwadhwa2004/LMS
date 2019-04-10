@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken');
-const User = require('../models/user');
+const User = require('../models/userModel');
 
-const auth = aysnc (req, res, next) => {
+const auth = async (req, res, next) => {
     try {
         const token = req.header('Authorization').replace('Bearer ', '');
         const payload = jwt.verify(token, 'secretKey');
@@ -17,6 +17,5 @@ const auth = aysnc (req, res, next) => {
         res.status(401).send({error: 'Please authenticate.'});
     }
 }
-
 
 module.exports = auth;

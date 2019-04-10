@@ -1,7 +1,6 @@
 const express = require('express');
 const mongoose = require('mongoose');
-//We don't want to grap anything from this file. By calling require, it will ensure that the 
-//file runs and it is going to ensure that mongoose connect to the database. 
+//We don't want to grab anything from this file. By calling require, it will ensure that the file runs and it is going to ensure that mongoose connect to the database. 
 require('./db/mongoose') 
 const userRouter = require('./routers/userRouter');
 
@@ -12,8 +11,4 @@ const port = process.env.PORT || 3000;
 app.use(express.json());
 app.use(userRouter);
 
-//without middleware: new request -> run route handler
-//with middleware: new request -> do somethign -> run route handler
-app.listen(port, () => {
-    console.log(`Server started. Listening on port ${port}`);
-})
+app.listen(port, () => console.log(`Server started. Listening on port ${port}`));
