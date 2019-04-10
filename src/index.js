@@ -12,6 +12,8 @@ const port = process.env.PORT || 3000;
 app.use(express.json());
 app.use(userRouter);
 
+//without middleware: new request -> run route handler
+//with middleware: new request -> do somethign -> run route handler
 app.listen(port, () => {
     console.log(`Server started. Listening on port ${port}`);
 })
