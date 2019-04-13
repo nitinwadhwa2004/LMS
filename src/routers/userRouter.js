@@ -1,7 +1,8 @@
 const express = require('express');
 const mongoose = require('mongoose');
-const User = require('../models/user');
+const User = require('../models/userModel');
 const auth = require('../middleware/auth');
+const multer = require ('multer');
 
 const router = express.Router();
 
@@ -18,6 +19,7 @@ router.post('/users', async (req, res) => {
     }
 })
 
+//Login route
 router.post('/users/login', async (req, res) => {
     try {
         const user = await User.findByCredentials(req.body.email, req.body.password); 
@@ -28,8 +30,31 @@ router.post('/users/login', async (req, res) => {
     }
 })
 
-//Find all users
-router.get('/users/profile', auth, async (req, res) => {
+router.post('/users/logout', auth, async (req, res) => {
+    try {
+        req.user.tokens = req.user.tokens.filter((token) => {
+            return token.token != req.token
+        })
+
+        await req.user.save();
+        res.send();
+    } catch (e) {
+        res.status(500).send();
+    }
+ }) 
+
+ router.post('/users/logoutall', auth, async (req, res) => {
+    try {
+        req.user.tokens = [];
+        await req.user.save();
+        res.send();
+    } catch (e) {
+        res.status(500).send();
+    }
+ })
+
+//User profile
+router.get('/users/me', auth, async (req, res) => {
    res.send(req.user);
 })
 
@@ -56,8 +81,7 @@ router.get('/users/:id', async (req, res) => {
 })
 
 //Update user
-router.patch('/users/:id', async (req, res) => {
-    const _id = req.params.id;
+router.patch('/users/me', auth, async (req, res) => {
 
     //Validation to check that user is not updating properties that don't exist or are not allowed.
     //Mongoose ignores properties which do not exist.
@@ -70,47 +94,44 @@ router.patch('/users/:id', async (req, res) => {
         return res.status(400).send({error: 'Invalid updates!'});
     }
 
-    if (!mongoose.Types.ObjectId.isValid(_id)) {
-        return res.status(400).send()
-    }
-
     try {
-        //findByIdAndUpdate bypasses mongoose. It performs a direct operation on the database.
-        //const user = await User.findByIdAndUpdate(_id, req.body, { new: true, runValidators: true})
-        const user = await User.findById(_id);
-        updates.forEach((update) => user[update] = req.body[update]);
-        await user.save();
-
-        if (!user) {
-            return res.status(404).send();
-        }
-
-        res.send(user);
+        updates.forEach((update) => req.user[update] = req.body[update]);
+        await req.user.save();
+        res.send(req.user);
     } catch (e) {
         res.status(400).send(e);
     }
 })
 
 //Delete user
-router.delete('/users/:id', async (req, res) => {
-    const _id = req.params.id;
-
-    if (!mongoose.Types.ObjectId.isValid(_id)) {
-        return res.status(400).send()
-    }
-
+router.delete('/users/me', auth, async (req, res) => {
     try {
-        const user = await User.findByIdAndDelete(_id);
-
-        if (!user) {
-            return res.status(404).send();
-        }
-    
-        res.send();
-        
+        req.user.remove();
+        res.send(req.user);
     } catch (e) {
         res.status(400).send(e);
     }
 })
+
+const upload = multer({
+    limits: {
+        fileSize: 1000000
+    },
+    fileFilter (req, file, cb) {
+        if (!file.originalname.match(/\.(jpg|jpeg|png)$/)) {
+            return cb(new Error('Please unpload an image.'))
+        }
+
+        cb(undefined, true);
+    }
+});
+
+router.post('/users/me/avatar', auth, upload.single('avatar'), async (req, res) => {
+    req.user.avatar = req.file.buffer;
+    await req.user.save();
+    res.send();
+}, (error, req, res, next) => {
+    res.status(400).send({ error: error.message });
+}) 
 
 module.exports = router;

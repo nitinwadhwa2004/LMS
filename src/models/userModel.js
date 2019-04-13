@@ -33,6 +33,9 @@ const userSchema = new mongoose.Schema({
             }
         }
     },
+    avatar: {
+        type: Buffer
+    },
     tokens: [{
         token: {
             type: String,
@@ -40,6 +43,18 @@ const userSchema = new mongoose.Schema({
         }
     }]
 })
+
+//when we pass an object to res.send(), express calls JSON.stringify() behind the scenes.
+//toJSON() function is called whenever the object is stringified
+userSchema.methods.toJSON = function () {
+    const user = this;
+    const userObject = user.toObject(); //convert document to raw object (removes extra mongoose properties/methods)
+
+    delete userObject.password;
+    delete userObject.tokens;
+
+    return userObject;
+}
 
 //Generate JWT token
 userSchema.methods.generateAuthToken = async function () {
@@ -77,8 +92,6 @@ userSchema.pre('save', async function(next) {
     if (user.isModified('password')) {
         user.password = await bcrypt.hash(user.password, 8);
     }
-
-    console.log('Before Save');
 
     next();
 })
