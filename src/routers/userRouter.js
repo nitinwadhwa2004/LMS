@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const User = require('../models/userModel');
 const auth = require('../middleware/auth');
 const multer = require ('multer');
+const sharp = require('sharp');
 
 const router = express.Router();
 
@@ -127,11 +128,33 @@ const upload = multer({
 });
 
 router.post('/users/me/avatar', auth, upload.single('avatar'), async (req, res) => {
+    const buffer = await sharp(req.file.buffer).resize({ width: 250, height: 250 }).png().toBuffer();
     req.user.avatar = req.file.buffer;
     await req.user.save();
     res.send();
 }, (error, req, res, next) => {
     res.status(400).send({ error: error.message });
 }) 
+
+router.delete('/users/me/avatar', auth, async (req, res) => {
+    req.user.avatar = undefined;
+    await req.user.save();
+    res.send();
+})
+
+router.get('/users/:id/avatar', auth, async (req, res) => {
+    try {
+        const user = await User.findById(req.params.id);
+
+        if (!user || !user.avatar) {
+            return new Error();
+        }
+
+        res.set('Content-Type', 'image/png');
+        res.send(user.avatar);
+    } catch (e) {
+        res.status(404).send();
+    }    
+})
 
 module.exports = router;
